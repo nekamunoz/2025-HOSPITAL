@@ -1,0 +1,138 @@
+[
+    {
+      "ID": "P001",
+      "habitacion": "401",
+      "días de estancia": [
+        {"fecha": "2024-03-01", "enfermeras": ["E101", "E102"]}
+      ]
+    },
+    {
+      "ID": "P002",
+      "habitacion": "410",
+      "días de estancia": [
+        {"fecha": "2024-02-25", "enfermeras": ["E102", "E103"]}
+      ]
+    },
+    {
+      "ID": "P003",
+      "habitacion": "433",
+      "días de estancia": [
+        {"fecha": "2024-03-03", "enfermeras": ["E101", "E104"]}
+      ]
+    },
+    {
+      "ID": "P004",
+      "habitacion": "442",
+      "días de estancia": [
+        {"fecha": "2024-01-20", "enfermeras": ["E102", "E105"]},
+        {"fecha": "2023-09-12", "enfermeras": ["E103", "E104"]}
+      ]
+    },
+    {
+      "ID": "P005",
+      "habitacion": "449",
+      "días de estancia": [
+        {"fecha": "2024-02-10", "enfermeras": ["E101", "E103"]}
+      ]
+    },
+    {
+      "ID": "P006",
+      "habitacion": "404",
+      "días de estancia": [
+        {"fecha": "2024-02-12", "enfermeras": ["E104", "E105"]}
+      ]
+    },
+    {
+      "ID": "P007",
+      "habitacion": "432",
+      "días de estancia": [
+        {"fecha": "2024-01-30", "enfermeras": ["E101", "E102"]}
+      ]
+    },
+    {
+      "ID": "P008",
+      "habitacion": "451",
+      "días de estancia": [
+        {"fecha": "2023-12-15", "enfermeras": ["E103", "E105"]}
+      ]
+    },
+    {
+      "ID": "P009",
+      "habitacion": "455",
+      "días de estancia": [
+        {"fecha": "2024-02-05", "enfermeras": ["E102", "E104"]}
+      ]
+    },
+    {
+      "ID": "P010",
+      "habitacion": "457",
+      "días de estancia": [
+        {"fecha": "2024-01-18", "enfermeras": ["E101", "E105"]}
+      ]
+    },
+    {
+      "ID": "P011",
+      "habitacion": "427",
+      "días de estancia": [
+        {"fecha": "2023-11-10", "enfermeras": ["E102", "E103"]}
+      ]
+    },
+    {
+      "ID": "P012",
+      "habitacion": "434",
+      "días de estancia": [
+        {"fecha": "2024-02-22", "enfermeras": ["E101", "E105"]}
+      ]
+    },
+    {
+      "ID": "P013",
+      "habitacion": "435",
+      "días de estancia": [
+        {"fecha": "2024-01-15", "enfermeras": ["E104", "E105"]}
+      ]
+    },
+    {
+      "ID": "P014",
+      "habitacion": "437",
+      "días de estancia": [
+        {"fecha": "2023-12-10", "enfermeras": ["E101", "E103"]}
+      ]
+    },
+    {
+      "ID": "P015",
+      "habitacion": "444",
+      "días de estancia": [
+        {"fecha": "2024-03-05", "enfermeras": ["E102", "E104"]}
+      ]
+    },
+    {
+      "ID": "P016",
+      "habitacion": "447",
+      "días de estancia": [
+        {"fecha": "2023-11-28", "enfermeras": ["E103", "E105"]}
+      ]
+    },
+    {
+      "ID": "P017",
+      "habitacion": "449",
+      "días de estancia": [
+        {"fecha": "2024-02-08", "enfermeras": ["E101", "E104"]}
+      ]
+    },
+    {
+      "ID": "P018",
+      "habitacion": "452",
+      "días de estancia": []
+    },
+    {
+      "ID": "P019",
+      "habitacion": "453",
+      "días de estancia": []
+    },
+    {
+      "ID": "P020",
+      "habitacion": "455",
+      "días de estancia": []
+    }
+  ]
+  
