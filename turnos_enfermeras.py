@@ -1,4 +1,5 @@
 import pandas as pd
+from datetime import datetime, timedelta
 
 
 # -------------------- FUNCIONES --------------------
@@ -40,6 +41,7 @@ def mostrar_turno_por_dia_y_tipo(resumen_turnos, fecha, turno, orden_turnos):
         print(f"Turno '{turno}' no es válido. Usa uno de: {', '.join(orden_turnos)}")
         return []
 
+
     filtro = (resumen_turnos['fecha'] == fecha) & (resumen_turnos['turno'] == turno)
     turno_df = resumen_turnos[filtro]
 
@@ -61,7 +63,9 @@ def mostrar_turno_por_dia_y_tipo(resumen_turnos, fecha, turno, orden_turnos):
 
 def main():
     # -------------------- CONFIGURACIÓN --------------------
-    excel_path = r"C:\Users\albae\Desktop\Proyecto hospital\2025-HOSPITAL\DUE_2025_4AB.CAMBIOS.xlsm"
+
+    excel_path = r"data\DUE_2025_4AB.CAMBIOS.xlsm"
+
     sheet_name = 'Abril'
     fila_inicio = 5
     turnos_validos = {'M', 'T', 'N', 'M;T', 'T;N', 'N;M'}
@@ -75,10 +79,14 @@ def main():
 
     # Consulta específica (puedes modificar estos valores)
     fecha_consulta = '2025-04-01'
+    fecha_consulta = datetime.strptime(fecha_consulta, "%Y-%m-%d").date()
+    print(fecha_consulta)
     turno_consulta = 'M'
+
     lista_enfermeras = mostrar_turno_por_dia_y_tipo(resumen, fecha_consulta, turno_consulta, orden_turnos)
-    
-    print(f"IDs de enfermeras para el {fecha_consulta} turno {turno_consulta}: {lista_enfermeras}")
+
+    return fecha_consulta, turno_consulta, lista_enfermeras
 
 # -------------------- LLAMADA --------------------
-main()
+if __name__ == "__main__":
+    main()
