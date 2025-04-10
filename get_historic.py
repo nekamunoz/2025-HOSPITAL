@@ -2,10 +2,6 @@ import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
 
-# ==============================
-# 1. FUNCIONES DE EXTRACCIÓN Y PROCESAMIENTO DE DATOS
-# ==============================
-
 def extract_patient_bed(file_path):
     df = pd.read_excel(file_path)
     df_4thfloor = df[df['CAMA'].astype(str).str.startswith('4')]
@@ -40,10 +36,6 @@ def filter_last_6_months(historial_df, fecha_actual):
     ]
     return filtered_df
 
-# ==============================
-# 2. ASIGNACIÓN DE ENFERMERAS
-# ==============================
-
 def calculate_nurses_per_control(total_nurses, control_a_dict, control_b_dict):
     patients_in_a = len(control_a_dict)
     patients_in_b = len(control_b_dict)
@@ -73,10 +65,6 @@ def number_rooms_per_nurses_per_control(control_a_dict, control_b_dict, nurses_i
         print("⚠️  Falta personal: Hay enfermeras con más pacientes del límite permitido.")
 
     return rooms_count_a, rooms_count_b
-
-# ==============================
-# 3. HISTORIAL Y TRATAMIENTOS
-# ==============================
 
 def treatment_historial(control_a_dict, control_b_dict, filtered_historial, enfermeras_turno):
     def proccess_historial(control_dict):
@@ -127,14 +115,10 @@ def generate_treatment_lists_by_nurse_from_summary(historial_resume_a_b, control
 
     return treatment_lists
 
-# ==============================
-# 4. FUNCIÓN PRINCIPAL
-# ==============================
-
 def main(fecha_actual, turno, enfermeras_turno):
     # Rutas de archivos
-    file_ingresados = r'data\Ingresados.xlsx'
-    file_historial = r'data\hcoIngresos.xlsx'
+    file_ingresados = r'data\Ingresados.xlsx' # EXTRAER
+    file_historial = r'data\hcoIngresos.xlsx' # EXTRAER
 
     # Extracción de datos
     control_a_dict, control_b_dict = extract_patient_bed(file_ingresados)
