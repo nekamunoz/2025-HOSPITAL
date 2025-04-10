@@ -64,7 +64,7 @@ def mostrar_turno_por_dia_y_tipo(resumen_turnos, fecha, turno, orden_turnos):
 def main():
     # -------------------- CONFIGURACIÓN --------------------
 
-    excel_path = r"data\DUE_2025_4AB.CAMBIOS.xlsm"
+    excel_path = r"data\abril.xlsm"
 
     sheet_name = 'Abril'
     fila_inicio = 5

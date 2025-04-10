@@ -165,11 +165,3 @@ def main(fecha_actual, turno, enfermeras_turno):
 
 if __name__ == "__main__":
     main()
-
-# if __name__ == '__main__':
-#     import argparse
-#     parser = argparse.ArgumentParser(description="Asignar enfermeras a controles A y B.")
-#     parser.add_argument('-i', type=str, help="Ruta del archivo Excel con los datos de pacientes y camas.")
-#     args = parser.parse_args()
-#     print(args.input)
-#     main()
