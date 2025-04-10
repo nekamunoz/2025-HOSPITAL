@@ -1,8 +1,6 @@
 import pandas as pd
-from datetime import datetime, timedelta
+from datetime import datetime
 
-
-# -------------------- FUNCIONES --------------------
 
 def cargar_datos_excel(path, sheet, skip):
     df = pd.read_excel(path, sheet_name=sheet, skiprows=skip)
@@ -11,7 +9,7 @@ def cargar_datos_excel(path, sheet, skip):
     return df
 
 def extraer_columnas_dias(df):
-    return [col for col in df.columns if "2025-04" in str(col)]
+    return [col for col in df.columns if "2025-04" in str(col)]  # ESTO PUEDE DAR PROBLEMAS EN OTRO MES
 
 def procesar_turnos(df, columnas_dias, turnos_validos):
     resultados = []
@@ -41,7 +39,7 @@ def mostrar_turno_por_dia_y_tipo(resumen_turnos, fecha, turno, orden_turnos):
         print(f"Turno '{turno}' no es válido. Usa uno de: {', '.join(orden_turnos)}")
         return []
 
-
+    resumen_turnos['fecha'] = pd.to_datetime(resumen_turnos['fecha']).dt.date
     filtro = (resumen_turnos['fecha'] == fecha) & (resumen_turnos['turno'] == turno)
     turno_df = resumen_turnos[filtro]
 
@@ -59,34 +57,29 @@ def mostrar_turno_por_dia_y_tipo(resumen_turnos, fecha, turno, orden_turnos):
         lista_ids = [int(nombre.split()[-1]) for nombre in enfermeras_str.split(', ')]
         return lista_ids
 
-# -------------------- FUNCIÓN PRINCIPAL --------------------
 
 def main():
-    # -------------------- CONFIGURACIÓN --------------------
-
-    excel_path = r"data\abril.xlsm"
-
-    sheet_name = 'Abril'
-    fila_inicio = 5
+    excel_path = r"data\abril.xlsm" # EXTRAER
+    sheet_name = 'Abril' # EXTRAER
+    fila_inicio = 5 # EXTRAER
     turnos_validos = {'M', 'T', 'N', 'M;T', 'T;N', 'N;M'}
     orden_turnos = ['M', 'T', 'N', 'M;T', 'T;N', 'N;M']
+    fecha_consulta = '2025-04-01' # EXTRAER
+    turno_consulta = 'M' # EXTRAER
     pd.set_option('display.max_colwidth', None)
 
     df = cargar_datos_excel(excel_path, sheet_name, fila_inicio)
+
     columnas_dias = extraer_columnas_dias(df)
     df_resultados = procesar_turnos(df, columnas_dias, turnos_validos)
     resumen = agrupar_turnos(df_resultados, orden_turnos)
 
-    # Consulta específica (puedes modificar estos valores)
-    fecha_consulta = '2025-04-01'
     fecha_consulta = datetime.strptime(fecha_consulta, "%Y-%m-%d").date()
-    print(fecha_consulta)
-    turno_consulta = 'M'
 
     lista_enfermeras = mostrar_turno_por_dia_y_tipo(resumen, fecha_consulta, turno_consulta, orden_turnos)
 
     return fecha_consulta, turno_consulta, lista_enfermeras
 
-# -------------------- LLAMADA --------------------
+
 if __name__ == "__main__":
     main()
