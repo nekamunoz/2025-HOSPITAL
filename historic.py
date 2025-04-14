@@ -1,6 +1,5 @@
 import pandas as pd
-import numpy as np
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 def extract_patient_bed(file_path):
     df = pd.read_excel(file_path)
@@ -109,13 +108,13 @@ def generate_treatment_lists_by_nurse_from_summary(historial_resume_a_b, control
         resumen_a = historial_resume_a_b['A']
         resumen_b = historial_resume_a_b['B']
         treatment_lists[enfermera] = {
-            'Control A': construir_lista(habitaciones_a, resumen_a, control_a_dict),
-            'Control B': construir_lista(habitaciones_b, resumen_b, control_b_dict)
+            'control_A': construir_lista(habitaciones_a, resumen_a, control_a_dict),
+            'control_B': construir_lista(habitaciones_b, resumen_b, control_b_dict)
         }
 
     return treatment_lists
 
-def main(fecha_actual, turno, enfermeras_turno):
+def get_historic(fecha_actual, turno, enfermeras_turno):
     # Rutas de archivos
     file_ingresados = r'data\Ingresados.xlsx' # EXTRAER
     file_historial = r'data\hcoIngresos.xlsx' # EXTRAER
@@ -142,10 +141,17 @@ def main(fecha_actual, turno, enfermeras_turno):
     print(f"\n--- Distribución Habitaciones ---\nControl A: {rooms_count_a}\nControl B: {rooms_count_b}")
     for enfermera, controles in treatment_lists.items():
         print(f"\nEnfermera {enfermera}:")
-        print(f"  Control A: {controles['Control A']}")
-        print(f"  Control B: {controles['Control B']}")
+        print(f"  Control A: {controles['control_A']}")
+        print(f"  Control B: {controles['control_B']}")
 
-    return treatment_lists, control_a_dict, control_b_dict
+    occupied_rooms = {
+        "control_A": list(control_a_dict.values()),
+        "control_B": list(control_b_dict.values()),
+    }
 
-if __name__ == "__main__":
-    main()
+    nurses_per_control = {
+        "control_A": nurses_in_a,
+        "control_B": nurses_in_b,
+    }
+
+    return treatment_lists, occupied_rooms, nurses_per_control
