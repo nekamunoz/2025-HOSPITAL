@@ -114,14 +114,11 @@ def generate_treatment_lists_by_nurse_from_summary(historial_resume_a_b, control
 
     return treatment_lists
 
-def get_historic(fecha_actual, turno, enfermeras_turno):
-    # Rutas de archivos
-    file_ingresados = r'data\Ingresados.xlsx' # EXTRAER
-    file_historial = r'data\hcoIngresos.xlsx' # EXTRAER
+def get_historic(fecha_actual, turno, enfermeras_turno, config):
 
     # Extracción de datos
-    control_a_dict, control_b_dict = extract_patient_bed(file_ingresados)
-    historial = extract_historial(file_historial)
+    control_a_dict, control_b_dict = extract_patient_bed(config['file_hosp'])
+    historial = extract_historial(config['file_historic'])
     filtered_historial = filter_last_6_months(historial, fecha_actual)
 
     # Asignación de enfermeras

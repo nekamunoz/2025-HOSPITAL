@@ -21,7 +21,7 @@ def main():
     date, shift, nurses = get_nurses_shift(config['excel_info'])
 
     # Get the historic data for the given date, shift, nurses and patients
-    historic, occupied_rooms, nurses_per_control = get_historic(date, shift, nurses)
+    historic, occupied_rooms, nurses_per_control = get_historic(date, shift, nurses, config['paths_historic'])
 
     # Create groups of rooms based on the number of nurses per control
     distributed_rooms = distribute_rooms(occupied_rooms, nurses_per_control)

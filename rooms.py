@@ -17,7 +17,7 @@ def load_controls(control_list):
                 control_dict[control] = {room["room"]: (room["x"], room["y"]) for room in data[control]}
     return control_dict
 
-def distribute_rooms(rooms, n_groups):
+def create_room_groups(rooms, n_groups):
     n_rooms = len(rooms)
     rooms_per_group = [n_rooms // n_groups + (1 if i < n_rooms % n_groups else 0) for i in range(n_groups)]
     print(f"Distribuyendo {n_rooms} habitaciones en {n_groups} grupos {rooms_per_group}")
@@ -104,7 +104,7 @@ def distribute_rooms(floor_occ_rooms, floor_nurses):
     groups_coord = {}
     for control in control_names:
         rooms_items = list(floor_occu_rooms_coord[control].items())
-        grouped_rooms, grouped_list = distribute_rooms(rooms_items, floor_nurses[control])
+        grouped_rooms, grouped_list = create_room_groups(rooms_items, floor_nurses[control])
         groups_lists[control] = grouped_list
         groups_coord[control] = grouped_rooms
             
