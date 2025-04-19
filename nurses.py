@@ -50,7 +50,7 @@ def mostrar_turno_por_dia_y_tipo(resumen_turnos, fecha, turno, orden_turnos):
         cantidad = turno_df.iloc[0]['cantidad_enfermeras']
 
         # Extraer IDs
-        lista_ids = [nombre.split()[-1] for nombre in enfermeras_str.split(', ')]
+        lista_ids = [int(nombre.split()[-1]) for nombre in enfermeras_str.split(', ')]
         return lista_ids
 
 
