@@ -1,9 +1,9 @@
 excel_info: 
-  excel_path: 'data\abril.xlsm'
-  sheet_name: 'Abril'
+  excel_path: 'data\mayo.xlsm'
+  #sheet_name: 'Mayo'
   fila_inicio: 5
-  fecha_consulta: '2025-04-01'
-  turno_consulta: 'M'
+  #fecha_consulta: '2025-05-03'
+  #turno_consulta: 'M'
 
 
 paths_historic:
