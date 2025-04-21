@@ -12,72 +12,46 @@ def extract_and_assign_groups(groups):
             group_counter += 1
     return extracted_groups
 
-def merge_controls(history):
-    merged_history = {}
-    for nurse, controls in history.items():
-        merged_history[nurse] = controls['control_A'] + controls['control_B']
-    return merged_history
-
-def merge_historial_resume(historial_resume_a_b):
-    # Comprobamos que las claves 'A' y 'B' están presentes en el diccionario
-    if 'A' in historial_resume_a_b and 'B' in historial_resume_a_b:
-        # Concatenamos los historiales de A y B
-        print("Concatenando historiales de A y B")
-        merged_historial_treatments = pd.concat([historial_resume_a_b['A'], historial_resume_a_b['B']], ignore_index=True)
-        print(merged_historial_treatments)
+def merge_historial_resume(historic):
+    if 'control_A' in historic and 'control_B' in historic:
+        merged_historial_treatments = pd.concat([historic['control_A'], historic['control_B']], ignore_index=True)
         return merged_historial_treatments
-    
     else:
-        print("Error: Las claves 'A' y 'B' no están presentes en el diccionario.")
+        print("Error: Las claves 'control_A' y 'control_B' no están presentes en el diccionario.")
         return None
 
-
-def get_patient_index(patients, patient_number):
-    try:
-        return patients.index(patient_number)
-    except ValueError:
-        return -1
-
-def count_group_treatments(nurse_id, group, historial_past_treatments):
+def count_group_treatments(nurse_id, group, historic):
     count = 0
     for patient_id in group:
-        tratamientos = historial_past_treatments[
-            (historial_past_treatments['ID_ENF'] == nurse_id) &
-            (historial_past_treatments['HABITACION'] == patient_id)
+        tratamientos = historic[
+            (historic['ID_ENF'] == nurse_id) &
+            (historic['HABITACION'] == patient_id)
         ]
         count += tratamientos['NUMERO_TRATAMIENTOS'].sum()
     return int(count)
 
-
-def calculate_cost(group, nurse_history, patients, nurse_id, historial_past_treatments, fecha_actual):
+def calculate_cost(group, nurse_id, historic, current_date):
     cost = 0
     for patient_id in group:
-        patient_index = get_patient_index(patients, patient_id)
-
-        fila = historial_past_treatments[
-            (historial_past_treatments['ID_ENF'] == nurse_id) &
-            (historial_past_treatments['HABITACION'] == patient_id)
+        fila = historic[
+            (historic['ID_ENF'] == nurse_id) &
+            (historic['HABITACION'] == patient_id)
         ]        
-        
         if not fila.empty:
             fecha_toma = pd.to_datetime(fila.iloc[0]['FECHA_TOMA_MÁS_RECIENTE'])
-            diferencia = relativedelta(fecha_actual, fecha_toma)
-            meses = diferencia.years * 12 + diferencia.months
-
-            # Penalización por antigüedad del tratamiento
-            if meses > 4:
-                cost += 2  # Si el tratamiento fue hace más de 4 meses
-            elif meses > 2:
-                cost += 1  # Si el tratamiento fue hace más de 2 meses
+            difference = relativedelta(current_date, fecha_toma)
+            months = difference.years * 12 + difference.months
+            if months > 4:
+                cost += 2  
+            elif months > 2:
+                cost += 1  
             else:
-                cost += 0  # Sin penalización si el tratamiento fue hace menos de 2 meses
-
+                cost += 0  
         else:
-            cost += 4  # Si el paciente no ha sido tratado por el enfermero (incluyendo penalización fecha), penalización máxima
-        
+            cost += 4
     return cost
 
-def create_branch_schema(nurses, groups, history, patients, historial_past_treatments, fecha_actual):
+def create_branch_schema(nurses, groups, historial_past_treatments, current_date):
     all_assignments = []
 
     for perm in permutations(nurses):
@@ -88,7 +62,7 @@ def create_branch_schema(nurses, groups, history, patients, historial_past_treat
         for i, nurse in enumerate(perm):
             group_key = list(groups.keys())[i]
             group_values = list(groups.values())[i]
-            cost = calculate_cost(group_values, history[nurse], patients, nurse, historial_past_treatments, fecha_actual)
+            cost = calculate_cost(group_values, nurse, historial_past_treatments, current_date)
             total_cost += cost
 
             treatments = count_group_treatments(nurse, group_values, historial_past_treatments)
@@ -119,16 +93,15 @@ def create_branch_schema(nurses, groups, history, patients, historial_past_treat
         best_assignment = max(min_cost_assignments, key=lambda x: x[3])
 
     best_perm, best_mapping, best_cost, best_treatments = best_assignment
-    return best_perm, best_mapping, best_cost, best_treatments
+    return best_mapping
 
 
-def assign_nurses(distributed_rooms, nurses_list, historic, historial_resume_a_b, patients, fecha_actual):
+def assign_nurses(distributed_rooms, nurses_list, historic, current_date):
+    # Get a dict of all rooms dictionaries
     all_groups = extract_and_assign_groups(distributed_rooms)
-    merged_historic = merge_controls(historic)
-    historial_past_treatments = merge_historial_resume(historial_resume_a_b)
-    patients = patients['control_A'] + patients['control_B']
 
-    best_perm, best_mapping, best_cost, best_treatments = create_branch_schema(nurses_list, all_groups, merged_historic, patients, historial_past_treatments, fecha_actual)
-
+    # Merge historic data form 
+    historial_past_treatments = merge_historial_resume(historic)
+    best_mapping = create_branch_schema(nurses_list, all_groups, historial_past_treatments, current_date)
     return best_mapping
     
