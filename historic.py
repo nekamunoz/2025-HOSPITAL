@@ -16,28 +16,6 @@ def extract_patient_bed(file_path):
             control_b[patient_id] = bed
     return control_a, control_b
 
-def extract_historic(file_path):
-    try:
-        historial_df = pd.read_excel(file_path)
-        historial_df['ID_ENF'] = historial_df['ID_ENF'].fillna('').astype(str)
-        historial_df['ID_ENF'] = historial_df['ID_ENF'].apply(
-            lambda x: x.split('.')[0] if '.' in x and x.replace('.','').isdigit() else x
-        )
-        historial_df['FECHA_TOMA'] = pd.to_datetime(historial_df['FECHA_TOMA']).dt.date
-        return historial_df
-    except Exception as e:
-        print(f"Error al leer el archivo: {e}")
-        return None
-
-def filter_last_6_months(historial_df, fecha_actual):
-    fecha_limite = fecha_actual - timedelta(days=6*30)
-    historial_df['FECHA_TOMA'] = pd.to_datetime(historial_df['FECHA_TOMA']).dt.date
-    filtered_df = historial_df[
-        (historial_df['FECHA_TOMA'] >= fecha_limite) &
-        (historial_df['FECHA_TOMA'] <= fecha_actual)
-    ]
-    return filtered_df
-
 def calculate_nurses_per_control(total_nurses, control_a_dict, control_b_dict):
     patients_in_a = len(control_a_dict)
     patients_in_b = len(control_b_dict)
@@ -46,58 +24,79 @@ def calculate_nurses_per_control(total_nurses, control_a_dict, control_b_dict):
     nurses_in_b = total_nurses - nurses_in_a
     return {"control_A": nurses_in_a, "control_B": nurses_in_b}
 
-def number_rooms_per_nurses_per_control(control_a_dict, control_b_dict, nurses_per_control, turno):
-    if turno in ["M", "T"]:
+def number_rooms_per_nurses_per_control(control_a_dict, control_b_dict, nurses_per_control, shift):
+    if shift in ["M", "T"]:
         max_patients_per_nurse = 11
-    elif turno == "N":
+    elif shift == "N":
         max_patients_per_nurse = 17
     else:
         raise ValueError("Turno no válido. Debe ser 'M', 'T' o 'N'.")
     
-    def dividir(control_dict, nurses):
+    def divide(control_dict, nurses):
         total = len(control_dict)
         base = total // nurses
         remainder = total % nurses
         return [base + (1 if i < remainder else 0) for i in range(nurses)]
 
-    rooms_count_a = dividir(control_a_dict, nurses_per_control['control_A'])
-    rooms_count_b = dividir(control_b_dict, nurses_per_control['control_B'])
+    rooms_count_a = divide(control_a_dict, nurses_per_control['control_A'])
+    rooms_count_b = divide(control_b_dict, nurses_per_control['control_B'])
 
     if any(count > max_patients_per_nurse for count in rooms_count_a + rooms_count_b):
         print("⚠️  Falta personal: Hay enfermeras con más pacientes del límite permitido.")
 
     return {"control_A": rooms_count_a, "control_B": rooms_count_b}
 
-def treatment_historial(control_a_dict, control_b_dict, filtered_historial, enfermeras_turno):
-    def proccess_historial(control_dict):
-        filtered_nurse_data = filtered_historial[filtered_historial['ID_ENF'].isin(enfermeras_turno)]
-        if len(filtered_nurse_data) == 0:
-            print("❌ No se han encontrado enfermeras con los IDs proporcionados.")
-        historial = filtered_historial[
-            (filtered_historial['ID_PACIENTE'].isin(control_dict)) &
-            (filtered_historial['ID_ENF'].isin(enfermeras_turno))].copy()
-        resumen = historial.groupby(['ID_ENF', 'ID_PACIENTE']).agg(
-            NUMERO_TRATAMIENTOS=('ID_ENF', 'count'),
-            FECHA_TOMA_MÁS_RECIENTE=('FECHA_TOMA', 'max')).reset_index()
+def treatment_historial(filepath, control_a_dict, control_b_dict, nurses_shift, current_date):
+    historic_df = pd.read_excel(filepath)
+    historic_df['FECHA_TOMA'] = pd.to_datetime(historic_df['FECHA_TOMA'], errors='coerce')
 
-        resumen['HABITACION'] = resumen['ID_PACIENTE'].map(control_dict)
+    def proccess_historial(control_dict, historic_df, current_date):
+        try:
+            
+            historic_df['ID_ENF'] = historic_df['ID_ENF'].fillna(0).astype(int).astype(str)
+            historic_df['ID_PACIENTE'] = historic_df['ID_PACIENTE'].astype(int)  
+            # nurses_shift_str = list(map(str, nurses_shift)) 
+            mask = historic_df['ID_PACIENTE'].isin(control_dict) & historic_df['ID_ENF'].isin(nurses_shift)
+            historic = historic_df.loc[mask].copy()
+            historic = historic[historic['ID_ENF'].isin(nurses_shift)]
 
-        resumen['HABITACION_ORDEN'] = resumen['HABITACION'].apply(
-            lambda x: (int(''.join(filter(str.isdigit, x))), ''.join(filter(str.isalpha, x))))
-        resumen = resumen.sort_values(by='HABITACION_ORDEN').drop(columns=['HABITACION_ORDEN'])
-        return resumen
+            historic['ID_ENF'] = (
+                historic['ID_ENF']
+                .fillna(0)
+                .astype(int)
+                .astype(str)
+            )
 
-    historial_a = proccess_historial(control_a_dict)
-    historial_b = proccess_historial(control_b_dict)
-    return {'control_A': historial_a, 'control_B': historial_b }
+            historic['FECHA_TOMA'] = pd.to_datetime(historic['FECHA_TOMA'], errors= 'coerce').dt.date
+            limit_date = current_date - timedelta(days=6*30)  # Last 6 months filter
+            historic = historic[
+                (historic['FECHA_TOMA'] >= limit_date) & 
+                (historic['FECHA_TOMA'] <= current_date)  
+            ]
+            
+            agg_funcs = {'ID_ENF': 'count', 'FECHA_TOMA': 'max'}
+            resume = historic.groupby(['ID_ENF', 'ID_PACIENTE']).agg(agg_funcs).rename(
+                columns={'ID_ENF': 'NUMERO_TRATAMIENTOS', 'FECHA_TOMA': 'FECHA_TOMA_MÁS_RECIENTE'}
+            ).reset_index()
+            
+            resume['HABITACION'] = resume['ID_PACIENTE'].map(control_dict)
+            
+            resume['HABITACION_ORDEN'] = resume['HABITACION'].apply(
+                lambda x: (int(''.join(filter(str.isdigit, x))), ''.join(filter(str.isalpha, x))))
+            resume = resume.sort_values(by='HABITACION_ORDEN').drop(columns=['HABITACION_ORDEN'])
+            return resume
+        
+        except Exception as e:
+            print(f"Error al leer el archivo: {e}")
+            return None
+        
+    historic_a = proccess_historial(control_a_dict, historic_df, current_date)
+    historic_b = proccess_historial(control_b_dict, historic_df, current_date)
+    return {'control_A': historic_a, 'control_B': historic_b }
 
 def get_historic(current_date, shift, shift_nurses, config):
     # Mapping of patients IDs to beds numbers for controls A and B
     control_a_dict, control_b_dict = extract_patient_bed(config['file_hosp'])
-
-    # Get and filter complete historic data
-    historic = extract_historic(config['file_historic'])
-    filtered_historic = filter_last_6_months(historic, current_date)
 
     # Get rooms division based on the number of nurses
     total_nurses = len(shift_nurses)
@@ -105,7 +104,7 @@ def get_historic(current_date, shift, shift_nurses, config):
     rooms_per_control = number_rooms_per_nurses_per_control(control_a_dict, control_b_dict, nurses_per_control, shift)
 
     # Generate summaries of treatments by nurse for both controls A and B
-    historial_resume_a_b = treatment_historial(control_a_dict, control_b_dict, filtered_historic, shift_nurses)
+    historial_resume_a_b = treatment_historial(config['file_historic'], control_a_dict, control_b_dict, shift_nurses, current_date)
 
     # Generate a list of occupied rooms for each control
     occupied_rooms_per_control = {"control_A": list(control_a_dict.values()),"control_B": list(control_b_dict.values())}

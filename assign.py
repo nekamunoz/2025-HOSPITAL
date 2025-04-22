@@ -33,13 +33,14 @@ def count_group_treatments(nurse_id, group, historic):
 def calculate_cost(group, nurse_id, historic, current_date):
     cost = 0
     for patient_id in group:
-        fila = historic[
+        row = historic[
             (historic['ID_ENF'] == nurse_id) &
             (historic['HABITACION'] == patient_id)
-        ]        
-        if not fila.empty:
-            fecha_toma = pd.to_datetime(fila.iloc[0]['FECHA_TOMA_MÁS_RECIENTE'])
-            difference = relativedelta(current_date, fecha_toma)
+        ]     
+
+        if not row.empty:
+            date_hist = pd.to_datetime(row.iloc[0]['FECHA_TOMA_MÁS_RECIENTE'])
+            difference = relativedelta(current_date, date_hist)
             months = difference.years * 12 + difference.months
             if months > 4:
                 cost += 2  

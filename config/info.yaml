@@ -2,7 +2,7 @@ excel_info:
   excel_path: 'data\abril.xlsm'
   sheet_name: 'Abril'
   fila_inicio: 5
-  fecha_consulta: '2025-04-01'
+  fecha_consulta: '2025-04-05'
   turno_consulta: 'M'
 
 
