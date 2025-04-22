@@ -17,10 +17,7 @@ def load_controls(control_list):
                 control_dict[control] = {room["room"]: (room["x"], room["y"]) for room in data[control]}
     return control_dict
 
-def create_room_groups(rooms, n_groups):
-    n_rooms = len(rooms)
-    rooms_per_group = [n_rooms // n_groups + (1 if i < n_rooms % n_groups else 0) for i in range(n_groups)]
-    print(f"Distribuyendo {n_rooms} habitaciones en {n_groups} grupos {rooms_per_group}")
+def create_room_groups(rooms, rooms_per_group):
     rooms.sort(key=lambda room: room[0])
 
     unique_perms = set(list(permutations(rooms_per_group)))
@@ -87,7 +84,7 @@ def plot_room_distribution(floor_coord, groups_coords, n_groups, w=1, h=1):
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
 
 
-def distribute_rooms(floor_occ_rooms, floor_nurses):
+def distribute_rooms(floor_occ_rooms, floor_patients):
     control_names = list(floor_occ_rooms.keys())
     floor_coord = load_controls(control_names)
     
@@ -104,10 +101,10 @@ def distribute_rooms(floor_occ_rooms, floor_nurses):
     groups_coord = {}
     for control in control_names:
         rooms_items = list(floor_occu_rooms_coord[control].items())
-        grouped_rooms, grouped_list = create_room_groups(rooms_items, floor_nurses[control])
+        grouped_rooms, grouped_list = create_room_groups(rooms_items, floor_patients[control])
         groups_lists[control] = grouped_list
         groups_coord[control] = grouped_rooms
             
-    plot_room_distribution(floor_coord, groups_coord, sum(floor_nurses.values()))
+    plot_room_distribution(floor_coord, groups_coord, sum(len(v) for v in floor_patients.values()))
 
     return groups_lists
