@@ -1,6 +1,8 @@
 from itertools import permutations
 from dateutil.relativedelta import relativedelta
 import pandas as pd
+from scipy.optimize import linear_sum_assignment
+import numpy as np
 
 def extract_and_assign_groups(groups):
     extracted_groups = {}
@@ -53,39 +55,39 @@ def calculate_cost(group, nurse_id, historic, current_date):
     return cost
 
 def create_branch_schema(nurses, groups, historial_past_treatments, current_date):
-    all_assignments = []
-
-    for perm in permutations(nurses):
-        total_cost = 0
-        total_treatments = 0
-        assignment = {}
-        
-        for i, nurse in enumerate(perm):
-            group_key = list(groups.keys())[i]
-            group_values = list(groups.values())[i]
-            cost = calculate_cost(group_values, nurse, historial_past_treatments, current_date)
-            total_cost += cost
-
-            treatments = count_group_treatments(nurse, group_values, historial_past_treatments)
-            total_treatments += treatments
-            
-            assignment[group_key] = (nurse, cost, treatments)
-        
-        all_assignments.append((perm, assignment, total_cost, total_treatments))
+    # Create cost matrix for Hungarian algorithm
+    n = len(nurses)
+    cost_matrix = np.zeros((n, n))
     
-    min_cost = min(a[2] for a in all_assignments)
-    min_cost_assignments = [a for a in all_assignments if a[2] == min_cost]
+    # Fill the cost matrix
+    for i, nurse in enumerate(nurses):
+        for j, (group_key, group_values) in enumerate(groups.items()):
+            cost = calculate_cost(group_values, nurse, historial_past_treatments, current_date)
+            treatments = count_group_treatments(nurse, group_values, historial_past_treatments)
+            # Store cost in matrix
+            cost_matrix[i][j] = cost
 
-    # PARA ENSEÑAR QUE ESTA FUNCIONANDO BIEN
-    #if len(min_cost_assignments) > 1:
-    #    print("EMPATE DE COSTE - mostrando... Las siguientes asignaciones empataron en coste:")
-    #    for idx, assignment in enumerate(min_cost_assignments, 1):
-    #        print(f"  Asignación {idx}:")
-    #        for group, (nurse, cost, treatments) in assignment[1].items():
-    #            print(f"    Grupo {group} → Enfermera {nurse} | Coste: {cost} | Tratamientos previos: {treatments}")
-    #        print(f"    Coste total: {assignment[2]}, Tratamientos totales: {assignment[3]}")
-    #else:
-    #    print("No hubo empate de coste.")
+    # Apply Hungarian algorithm
+    row_ind, col_ind = linear_sum_assignment(cost_matrix)
+    
+    # Create assignment dictionary
+    assignment = {}
+    total_cost = 0
+    total_treatments = 0
+    
+    for i, j in zip(row_ind, col_ind):
+        nurse = nurses[i]
+        group_key = list(groups.keys())[j]
+        group_values = list(groups.values())[j]
+        
+        cost = cost_matrix[i][j]
+        treatments = count_group_treatments(nurse, group_values, historial_past_treatments)
+        
+        assignment[group_key] = (nurse, int(cost), treatments)
+        total_cost += cost
+        total_treatments += treatments
+
+    min_cost_assignments = [(row_ind, assignment, total_cost, total_treatments)]
 
     if len(min_cost_assignments) == 1:
         best_assignment = min_cost_assignments[0]
