@@ -1,9 +1,6 @@
 excel_info:
   excel_path: 'data\excel2025.xlsm'
-  #sheet_name: 'Mayo'
   start_row: 5
-  #query_date: '2025-05-03'
-  #query_shift: 'M'
 
 paths_historic:
   file_hosp: 'data\Ingresados.xlsx' 
