@@ -53,10 +53,12 @@ def create_room_groups(rooms, rooms_per_group):
 def plot_room_distribution(floor_coord, groups_coords, n_groups, w=1, h=1):
     cmap = plt.get_cmap('tab20', n_groups)
     group_colors = cmap.colors
-    
-    plt.figure(figsize=(14, 12))
+
+    plt.figure(figsize=(14, 8))
     ax = plt.gca()
-    
+
+    global_group_idx = 0
+
     for control, groups in groups_coords.items():
         output_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'room_distribution.png')
 
@@ -64,21 +66,22 @@ def plot_room_distribution(floor_coord, groups_coords, n_groups, w=1, h=1):
             rect = Rectangle((x, y), w, h, edgecolor='black', facecolor='lightgray', alpha=0.5)
             ax.add_patch(rect)
 
-        for group_idx, group in enumerate(groups):
+        for group in groups:
             room_coords = [(x, y) for _, (x, y) in group]
-            
+
             for room, (x, y) in group:
-                rect = Rectangle((x, y), w, h, edgecolor='black', facecolor=group_colors[group_idx % len(group_colors)])
+                color = group_colors[global_group_idx % len(group_colors)]
+                rect = Rectangle((x, y), w, h, edgecolor='black', facecolor=color)
                 ax.add_patch(rect)
                 ax.text(x + w/2, y + h/2, room, color='black', ha='center', va='center', fontsize=8)
 
             center_x = np.mean([x + w/2 for x, y in room_coords])
             center_y = np.mean([y + h/2 for x, y in room_coords])
-            ax.text(center_x, center_y, f"Group {group_idx+1}\n{len(group)} beds", color='white', ha='center', va='center', fontsize=10, bbox=dict(facecolor='black', alpha=0.5))
+            ax.text(center_x, center_y, f"Grupo {global_group_idx + 1}\n{len(group)} camas", color='white', ha='center', va='center', fontsize=10, bbox=dict(facecolor='black', alpha=0.5))
 
-    plt.title('Room Layout with Groups')
-    plt.xlabel('X Coordinate')
-    plt.ylabel('Y Coordinate')
+            global_group_idx += 1
+
+    plt.title('Organización de Grupos de Habitaciones')
     plt.grid(True, color='black', linestyle='--', alpha=0.3)  
     plt.axis('equal')
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
