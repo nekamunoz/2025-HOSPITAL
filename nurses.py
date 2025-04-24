@@ -91,7 +91,7 @@ def display_shift_by_day_and_type(shift_summary, date, shift, shift_order):
     nurse_ids = []
     for name in found_nurses:
         try:
-            nurse_id = int(name.split()[-1])
+            nurse_id = str(name.split()[-1])
             nurse_ids.append(nurse_id)
         except (ValueError, IndexError):
             print(f"Advertencia: No se pudo extraer ID de '{name}'. Ignorando.")
