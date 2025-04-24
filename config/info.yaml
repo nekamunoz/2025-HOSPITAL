@@ -1,10 +1,6 @@
-excel_info: 
-  excel_path: 'data\abril.xlsm'
-  sheet_name: 'Abril'
-  fila_inicio: 5
-  fecha_consulta: '2025-04-05'
-  turno_consulta: 'M'
-
+excel_info:
+  excel_path: 'data\excel2025.xlsm'
+  start_row: 5
 
 paths_historic:
   file_hosp: 'data\Ingresados.xlsx' 
