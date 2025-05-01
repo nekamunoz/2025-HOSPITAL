@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HUS</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <main>
+        <section class="indexContent">
+            <h2>Asignación de enfermeras</h2>
+            <form action="{% url 'assignation' %}" method="post">
+                {% csrf_token %}
+                <label for="date">Seleccione la fecha:</label>
+                <input type="date" id="date" name="date" value="{{ current_date }}" required>
+                <label for="shift">Selecione el Turno:</label>
+                <select id="shift" name="shift" required>
+                    <option value="Mañana" {% if current_shift == "M" %}selected{% endif %}>Mañana</option>
+                    <option value="Tarde" {% if current_shift == "T" %}selected{% endif %}>Tarde</option>
+                    <option value="Noche" {% if current_shift == "N" %}selected{% endif %}>Noche</option>
+                </select>
+                <button type="submit" class="btn">Iniciar Asignación</button>
+            </form>
+        </section>
+    </main>
+    <footer>
+        <p>&copy;2025 Sistema de Asignación de Enfermeras</p>
+    </footer>
+</body>
+</html>

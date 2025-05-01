@@ -1,6 +1,10 @@
 import pandas as pd
 from datetime import timedelta
 
+from django.conf import settings
+file_hosp = settings.FILE_HOSP
+file_historic = settings.FILE_HISTORIC
+
 def extract_patient_bed(file_path):
     df = pd.read_excel(file_path)
     df_4thfloor = df[df['CAMA'].astype(str).str.startswith('4')]
@@ -55,7 +59,6 @@ def treatment_historial(filepath, control_a_dict, control_b_dict, nurses_shift, 
             
             historic_df['ID_ENF'] = historic_df['ID_ENF'].fillna(0).astype(int).astype(str)
             historic_df['ID_PACIENTE'] = historic_df['ID_PACIENTE'].astype(int)  
-            # nurses_shift_str = list(map(str, nurses_shift)) 
             mask = historic_df['ID_PACIENTE'].isin(control_dict) & historic_df['ID_ENF'].isin(nurses_shift)
             historic = historic_df.loc[mask].copy()
             historic = historic[historic['ID_ENF'].isin(nurses_shift)]
@@ -94,9 +97,9 @@ def treatment_historial(filepath, control_a_dict, control_b_dict, nurses_shift, 
     historic_b = proccess_historial(control_b_dict, historic_df, current_date)
     return {'control_A': historic_a, 'control_B': historic_b }
 
-def get_historic(current_date, shift, shift_nurses, config):
+def get_historic(current_date, shift, shift_nurses):
     # Mapping of patients IDs to beds numbers for controls A and B
-    control_a_dict, control_b_dict = extract_patient_bed(config['file_hosp'])
+    control_a_dict, control_b_dict = extract_patient_bed(file_hosp)
 
     # Get rooms division based on the number of nurses
     total_nurses = len(shift_nurses)
@@ -104,7 +107,7 @@ def get_historic(current_date, shift, shift_nurses, config):
     rooms_per_control = number_rooms_per_nurses_per_control(control_a_dict, control_b_dict, nurses_per_control, shift)
 
     # Generate summaries of treatments by nurse for both controls A and B
-    historial_resume_a_b = treatment_historial(config['file_historic'], control_a_dict, control_b_dict, shift_nurses, current_date)
+    historial_resume_a_b = treatment_historial(file_historic, control_a_dict, control_b_dict, shift_nurses, current_date)
 
     # Generate a list of occupied rooms for each control
     occupied_rooms_per_control = {"control_A": list(control_a_dict.values()),"control_B": list(control_b_dict.values())}

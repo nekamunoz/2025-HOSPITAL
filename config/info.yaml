@@ -1,7 +1,0 @@
-excel_info:
-  excel_path: 'data\excel2025.xlsm'
-  start_row: 5
-
-paths_historic:
-  file_hosp: 'data\Ingresados.xlsx' 
-  file_historic: 'data\hcoIngresos.xlsx' 

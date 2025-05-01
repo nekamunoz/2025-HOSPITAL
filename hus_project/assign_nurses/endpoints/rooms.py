@@ -1,13 +1,19 @@
 import json
 import os
-import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.patches import Rectangle
 from itertools import permutations
 
-def load_controls(control_list):
-    file_path = os.path.dirname(os.path.abspath(__file__))
-    controls_path = os.path.join(file_path, 'config', 'controls.json')
+import numpy as np
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+from matplotlib.patches import Rectangle
+
+from django.conf import settings
+save_path = settings.SAVE_PATH
+file_controls = settings.FILE_CONTROLS
+
+def load_controls(control_list, control_path):
+    controls_path = os.path.join(control_path)
 
     control_dict = {}
     with open(controls_path, 'r') as file:
@@ -50,18 +56,21 @@ def create_room_groups(rooms, rooms_per_group):
         final_groups[i] = group
     return best_grouped_rooms, final_groups
 
-def plot_room_distribution(floor_coord, groups_coords, n_groups, w=1, h=1):
+def plot_room_distribution(floor_coord, groups_coords, n_groups, query_date, query_shift, w=1, h=1):
+    output_path = os.path.join(save_path, 'rooms.png')
     cmap = plt.get_cmap('tab20', n_groups)
     group_colors = cmap.colors
 
     plt.figure(figsize=(14, 8))
     ax = plt.gca()
+    ax = plt.gca()
+    ax.set_xticks([])
+    ax.set_yticks([])
+    ax.tick_params(left=False, bottom=False, labelleft=False, labelbottom=False)
 
     global_group_idx = 0
 
     for control, groups in groups_coords.items():
-        output_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'room_distribution.png')
-
         for room, (x, y) in floor_coord[control].items():
             rect = Rectangle((x, y), w, h, edgecolor='black', facecolor='lightgray', alpha=0.5)
             ax.add_patch(rect)
@@ -81,15 +90,15 @@ def plot_room_distribution(floor_coord, groups_coords, n_groups, w=1, h=1):
 
             global_group_idx += 1
 
-    plt.title('Organización de Grupos de Habitaciones')
+    plt.title(f'Distribución para el turno {query_shift} del {query_date}')
     plt.grid(True, color='black', linestyle='--', alpha=0.3)  
     plt.axis('equal')
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
 
 
-def distribute_rooms(floor_occ_rooms, floor_patients):
+def distribute_rooms(floor_occ_rooms, floor_patients, query_date, query_shift):
     control_names = list(floor_occ_rooms.keys())
-    floor_coord = load_controls(control_names)
+    floor_coord = load_controls(control_names, file_controls)
     
     floor_occu_rooms_coord = {}
     for control, rooms in floor_occ_rooms.items():
@@ -107,7 +116,8 @@ def distribute_rooms(floor_occ_rooms, floor_patients):
         grouped_rooms, grouped_list = create_room_groups(rooms_items, floor_patients[control])
         groups_lists[control] = grouped_list
         groups_coord[control] = grouped_rooms
-            
-    plot_room_distribution(floor_coord, groups_coord, sum(len(v) for v in floor_patients.values()))
+    
+    n_groups = sum(len(v) for v in floor_patients.values())
+    plot_room_distribution(floor_coord, groups_coord, n_groups, query_date, query_shift)
 
     return groups_lists

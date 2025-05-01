@@ -1,10 +1,11 @@
 import pandas as pd
-from datetime import datetime
+
+from django.conf import settings
+excel_path = settings.EXCEL_PATH
+start_row = settings.START_ROW
 
 def load_excel_data(path, sheet, skip_rows):
-    """
-    Load data from an Excel file and validate the presence of the 'NOMBRE Y APELLIDOS' column.
-    """
+    """ Load data from an Excel file and validate the presence of the 'NOMBRE Y APELLIDOS' column."""
     try:
         df = pd.read_excel(path, sheet_name=sheet, skiprows=skip_rows)
         df = df.dropna(axis=1, how='all')
@@ -18,9 +19,7 @@ def load_excel_data(path, sheet, skip_rows):
         raise ValueError(f"Error al leer la hoja {sheet}: {e}")
 
 def extract_day_columns(df, query_date):
-    """
-    Extract columns corresponding to the days of the specified month and year.
-    """
+    """ Extract columns corresponding to the days of the specified month and year. """
     month_year = query_date.strftime("%Y-%m")
     columns = []
     for col in df.columns:
@@ -37,9 +36,7 @@ def extract_day_columns(df, query_date):
     return columns
 
 def process_shifts(df, day_columns, valid_shifts):
-    """
-    Process shifts for each day, filtering by valid shifts.
-    """
+    """ Process shifts for each day, filtering by valid shifts. """
     results = []
     for day in day_columns:
         temp = df[['name', day]].copy()
@@ -50,9 +47,7 @@ def process_shifts(df, day_columns, valid_shifts):
     return pd.concat(results, ignore_index=True) if results else pd.DataFrame(columns=['date', 'name', 'shift'])
 
 def group_shifts(df_results, shift_order):
-    """
-    Group shifts by date and shift type, summarizing nurse counts and names.
-    """
+    """ Group shifts by date and shift type, summarizing nurse counts and names. """
     if df_results.empty:
         return pd.DataFrame(columns=['date', 'shift', 'nurse_count', 'nurses'])
     summary = df_results.groupby(['date', 'shift']).agg(
@@ -64,9 +59,7 @@ def group_shifts(df_results, shift_order):
     return summary
 
 def display_shift_by_day_and_type(shift_summary, date, shift, shift_order):
-    """
-    Display nurses for a specific date and shift type, returning their IDs.
-    """
+    """ Display nurses for a specific date and shift type, returning their IDs. """
     if shift not in shift_order:
         raise ValueError(f"Turno '{shift}' no es válido. Usa uno de: {', '.join(shift_order)}")
 
@@ -97,10 +90,7 @@ def display_shift_by_day_and_type(shift_summary, date, shift, shift_order):
             print(f"Advertencia: No se pudo extraer ID de '{name}'. Ignorando.")
     return sorted(nurse_ids)
 
-def get_nurse_shift(config):
-    """
-    Main function to retrieve nurses for a specific shift and date.
-    """
+def get_nurse_shift(query_date, query_shift):
     valid_shifts = {'M', 'T', 'N', 'M;T', 'T;N', 'N;M'}
     shift_order = ['M', 'T', 'N', 'M;T', 'T;N', 'N;M']
     pd.set_option('display.max_colwidth', None)
@@ -110,19 +100,17 @@ def get_nurse_shift(config):
         7: 'Julio', 8: 'Agosto', 9: 'Septiembre', 10: 'Octubre', 11: 'Noviembre', 12: 'Diciembre'
     }
 
-    query_date = datetime.strptime(config['query_date'], "%Y-%m-%d")
     month = query_date.month
     try:
         sheet_name = month_sheets[month]
     except KeyError:
         raise ValueError(f"No se encontró una hoja para el mes {month}")
 
-    df = load_excel_data(config['excel_path'], sheet_name, config['start_row'])
+    df = load_excel_data(excel_path, sheet_name, start_row)
     day_columns = extract_day_columns(df, query_date)
     shift_results = process_shifts(df, day_columns, valid_shifts)
     summary = group_shifts(shift_results, shift_order)
 
-    query_shift = config['query_shift']
     nurse_list = display_shift_by_day_and_type(summary, query_date.date(), query_shift, shift_order)
 
     return query_date.date(), query_shift, nurse_list
