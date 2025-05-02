@@ -24,6 +24,12 @@ def parse_date(date_str):
         raise ValueError("Invalid date format. Expected YYYY-MM-DD.")
 
 def parse_shift(shift_str):
-    """ Parse a shift string into a single character. """
+    """ Parse a shift string into its shorthand or full name. """
     shift_map = {'Mañana': 'M', 'Tarde': 'T', 'Noche': 'N'}
-    return shift_map[shift_str]
+    inverse_map = {v: k for k, v in shift_map.items()}
+    if shift_str in shift_map:
+        return shift_map[shift_str]
+    elif shift_str in inverse_map:
+        return inverse_map[shift_str]
+    else:
+        raise ValueError("Invalid shift. Expected 'M', 'T', 'N' or 'Mañana', 'Tarde', 'Noche'.")

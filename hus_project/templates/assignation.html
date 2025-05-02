@@ -4,15 +4,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HUS</title>
+    <title>Asignación Enfermería HUS</title>
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 </head>
 <body>
     <main>
         <section class="content">
-            <h1>Resultados de la asignación de enfermeras</h1>
-            <div class="container" style="flex-grow: 1;">
-                <p id="loading" class="loading">Procesando para {{selected_shift}} {{selected_date}}, por favor espere...</p>
+            <h1 id="title" class="hidden">Resultados de la asignación de enfermeras</h1>
+            <div class="container">
+                <p id="loading" class="loading">Procesando para el turno de <b>{{selected_shift}} {{selected_date}}</b>, por favor espere...</p>
                 <img src="{% static 'img/loading.gif' %}" alt="loadingImg" />
             </div>
             <div class="flex-container">
@@ -25,9 +25,6 @@
             </div>
         </section>
     </main>
-    <footer>
-        <p>&copy; 2025 Sistema de Asignación de Enfermeras</p>
-    </footer>
     <script>
         const selectedDate = "{{ selected_date }}";
         const selectedShift = "{{ selected_shift }}";
@@ -40,23 +37,24 @@
                 const loadingImg = document.querySelector('img[alt="loadingImg"]');
                 const image1 = document.getElementById('distributionImg');
                 const image2 = document.getElementById('tableImg');
+                const title = document.getElementById('title');
     
                 if (loading) loading.remove();
                 if (loadingImg) loadingImg.remove();
     
-                const timestamp = new Date().getTime();
+                const timestamp = new Date().getTime(); 
     
                 image1.src = `{% static 'img/rooms.png' %}?t=${timestamp}`;
                 image2.src = `{% static 'img/table.png' %}?t=${timestamp}`;
     
                 image1.style.display = 'block';
-                image2.style.display = 'block';
+                image2.style.display = 'block';                
+                if (title) title.style.display = 'block';
             })
             .catch(error => {
-                document.querySelector('.container').innerHTML = "<p style='color:red;'>Failed to load data.</p>";
+                document.querySelector('.container').innerHTML = "<p style='color:red;'>Error durante el procesamiento.</p>";
                 console.error('Error:', error);
             });
     </script>
-    
 </body>
 </html>

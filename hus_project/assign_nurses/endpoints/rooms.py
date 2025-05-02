@@ -8,6 +8,8 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 
+from . import utils
+
 from django.conf import settings
 save_path = settings.SAVE_PATH
 file_controls = settings.FILE_CONTROLS
@@ -90,7 +92,8 @@ def plot_room_distribution(floor_coord, groups_coords, n_groups, query_date, que
 
             global_group_idx += 1
 
-    plt.title(f'Distribución para el turno {query_shift} del {query_date}')
+    query_shift = utils.parse_shift(query_shift)
+    plt.title(f'Distribución de pasillos para el turno {query_shift} del {query_date}')
     plt.grid(True, color='black', linestyle='--', alpha=0.3)  
     plt.axis('equal')
     plt.savefig(output_path, dpi=300, bbox_inches='tight')

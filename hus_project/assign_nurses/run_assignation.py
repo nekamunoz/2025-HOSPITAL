@@ -1,5 +1,4 @@
 import time
-from . import utils
 from .endpoints.nurses import get_nurse_shift
 from .endpoints.historic import get_historic
 from .endpoints.rooms import distribute_rooms
@@ -30,7 +29,7 @@ def main(query_date, query_shift):
 
     # Assign nurses to the distributed rooms given historic data
     assign_start = time.time()
-    best_mapping = assign_nurses(distributed_rooms, nurses, historic, query_date)
+    best_mapping = assign_nurses(distributed_rooms, nurses, historic, query_date, str_date, query_shift)
     print(f"[INFO]: assign_nurses took {time.time() - assign_start:.2f} seconds")
 
     print(f"[INFO]: Asignación: \n {best_mapping}")

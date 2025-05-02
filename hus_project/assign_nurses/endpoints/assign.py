@@ -5,6 +5,7 @@ from dateutil.relativedelta import relativedelta
 from matplotlib.table import Table
 import matplotlib.pyplot as plt
 from scipy.optimize import linear_sum_assignment
+from . import utils
 
 from django.conf import settings
 save_path = settings.SAVE_PATH
@@ -37,7 +38,7 @@ def count_group_treatments(nurse_id, group, historic):
         count += tratamientos['NUMERO_TRATAMIENTOS'].sum()
     return int(count)
 
-def calculate_cost(group, nurse_id, historic, current_date):
+def calculate_cost(group, nurse_id, historic, query_date):
     cost = 0
     for patient_id in group:
         row = historic[
@@ -47,7 +48,7 @@ def calculate_cost(group, nurse_id, historic, current_date):
 
         if not row.empty:
             date_hist = pd.to_datetime(row.iloc[0]['FECHA_TOMA_MÁS_RECIENTE'])
-            difference = relativedelta(current_date, date_hist)
+            difference = relativedelta(query_date, date_hist)
             months = difference.years * 12 + difference.months
             days = difference.days
             months = months + (days / 30)
@@ -61,7 +62,7 @@ def calculate_cost(group, nurse_id, historic, current_date):
             cost += 4
     return cost
 
-def create_branch_schema(nurses, groups, historial_past_treatments, current_date):
+def create_branch_schema(nurses, groups, historial_past_treatments, query_date):
     # Create cost matrix for Hungarian algorithm
     n = len(nurses)
     cost_matrix = np.zeros((n, n))
@@ -69,7 +70,7 @@ def create_branch_schema(nurses, groups, historial_past_treatments, current_date
     # Fill the cost matrix
     for i, nurse in enumerate(nurses):
         for j, (group_key, group_values) in enumerate(groups.items()):
-            cost = calculate_cost(group_values, nurse, historial_past_treatments, current_date)
+            cost = calculate_cost(group_values, nurse, historial_past_treatments, query_date)
             treatments = count_group_treatments(nurse, group_values, historial_past_treatments)
             # Store cost in matrix
             cost_matrix[i][j] = cost
@@ -117,7 +118,7 @@ def format_mapping(mapping, rooms_lists):
             mapping[f"Grupo {group[1:]}"] = mapping.pop(group)
     return mapping
 
-def create_table(mapping):
+def create_table(mapping, query_date, query_shift):
     output_path = os.path.join(save_path, 'table.png')
     fig, ax = plt.subplots(figsize=(10, 6)) 
     ax.axis('off')
@@ -137,18 +138,19 @@ def create_table(mapping):
 
     ax.add_table(table)
     ax.set_axis_off()
-    plt.title(f'Tabla de asignación de enfermeras')
+    query_shift = utils.parse_shift(query_shift)
+    plt.title(f'Tabla de asignación de enfermeras para el turno {query_shift} del {query_date}')
     plt.savefig(output_path, bbox_inches='tight')
 
-def assign_nurses(distributed_rooms, nurses_list, historic, current_date):
+def assign_nurses(distributed_rooms, nurses_list, historic, query_date, str_date, query_shift):
     # Get a dict of all rooms dictionaries
     all_groups = extract_and_assign_groups(distributed_rooms)
 
     # Merge historic data form 
     historial_past_treatments = merge_historial_resume(historic)
-    best_mapping = create_branch_schema(nurses_list, all_groups, historial_past_treatments, current_date)
+    best_mapping = create_branch_schema(nurses_list, all_groups, historial_past_treatments, query_date)
 
-    create_table(format_mapping(best_mapping, all_groups))
+    create_table(format_mapping(best_mapping, all_groups), str_date, query_shift)
 
     return best_mapping
     

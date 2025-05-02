@@ -2,7 +2,7 @@ from django.shortcuts import redirect
 from django.shortcuts import render
 from django.http import JsonResponse
 from . import run_assignation
-from . import utils
+from .endpoints import utils
 
 def index(request):
     current_date, current_shift = utils.get_current_query_params()
