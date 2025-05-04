@@ -2,7 +2,7 @@
 body, html {
     height: 100%;
     margin: 0;
-    font-family: Arial, sans-serif;
+    font-family: 'Inter', sans-serif;
     background-color: #e4e7eb;
 }
 
@@ -16,11 +16,9 @@ main {
 
 .indexContent {
     background: white;
-    padding: 40px;
+    padding: 40px 50px;
     border-radius: 12px;
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-    max-width: 30%;
-    width: 100%;
 }
 
 .content {

@@ -6,11 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Asignación Enfermería HUS</title>
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 </head>
 <body>
     <main>
         <section class="content">
-            <h1 id="title" class="hidden">Resultados de la asignación de enfermeras</h1>
+            <h2 id="title" class="hidden">Resultados de la asignación de enfermeras</h2>
             <div class="container">
                 <p id="loading" class="loading">Procesando para el turno de <b>{{selected_shift}} {{selected_date}}</b>, por favor espere...</p>
                 <img src="{% static 'img/loading.gif' %}" alt="loadingImg" />

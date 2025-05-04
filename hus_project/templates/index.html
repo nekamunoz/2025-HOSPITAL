@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Asignación Enfermería HUS</title>
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 </head>
 <body>
     <main>
@@ -13,7 +14,7 @@
             <div class="image-wrapper image-logo">
                 <img id="logo" src="{% static 'img/logo_sureste.png' %}">
             </div>
-            <h2>Asignación de enfermeras</h2>
+            <h3>Asignación de enfermeras</h3>
             <form action="{% url 'assignation' %}" method="post">
                 {% csrf_token %}
                 <label for="date">Selecione la fecha:</label>
